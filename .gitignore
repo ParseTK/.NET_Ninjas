@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+
+# Visual Studio cache
+.vs/
+
+# Local database files
+*.mdf
+*.ldf
+
+# App settings 
+appsettings*.json
+
+# EF Core migrations 
+Migrations/
+
+# User secrets folder 
+secrets.json
