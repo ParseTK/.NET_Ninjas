@@ -510,6 +510,6 @@ git fetch                           # 📥 Download remote changes (don't merge)
 
 
 
-**Last Updated:** November 2024  
-**Version:** 2.0  
+**Last Updated:** November 2025  
+**Version:** 1.0  
 **Maintained by:** Development Team
