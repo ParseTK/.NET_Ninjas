@@ -12,10 +12,6 @@ namespace SalesLedger.Models
         public string ProductName { get; set; }
 
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [Required]
         public decimal UnitPrice { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
