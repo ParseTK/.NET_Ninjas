@@ -3,9 +3,9 @@ using SalesLedger.Models;
 
 namespace SalesLedger.Data
 {
-    public class AppDbContext : DbContext
+    public class SalesLedgerDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : 
+        public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options) : 
             base(options) { }
 
         public DbSet<Customer> Customers { get; set; }
