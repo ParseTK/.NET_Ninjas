@@ -8,8 +8,8 @@ namespace SalesLedger.Data
         public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options) : 
             base(options) { }
 
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Order> Orders { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<Products> Products { get; set; }
+        public DbSet<Orders> Orders { get; set; }
     }
 }

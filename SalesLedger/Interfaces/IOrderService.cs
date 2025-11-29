@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using SalesLedger.Models;
 
 namespace SalesLedger.Interfaces
 {
     public interface IOrderService
     {
-        Task<Order> AddAsync(Order order);
-        Task<Order> GetByIdAsync(int id);
-        Task<IEnumerable<Order>> GetAllAsync();
-        Task<Order> UpdateAsync(Order order);
-
-        Task<Order> DeleteAsync(int id);
+        Task<Orders> CreateAsync(Orders order, CancellationToken cancellationToken = default);
+        Task<Orders?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Orders>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Orders>> GetByProductIdAsync(Guid productId, CancellationToken cancellationToken = default);
+        Task<bool> UpdateAsync(Orders order, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }
