@@ -4,10 +4,10 @@ namespace SalesLedger.Interfaces
 {
        public interface IProductService
     {
-        Task<Product> CreateAsync(Product product, CancellationToken cancellationToken = default);
-        Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default);
+        Task<Products> CreateAsync(Products product, CancellationToken cancellationToken = default);
+        Task<Products?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Products>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<bool> UpdateAsync(Products product, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }

@@ -17,7 +17,7 @@ namespace SalesLedger.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Product> CreateAsync(Product product, CancellationToken cancellationToken = default)
+        public async Task<Products> CreateAsync(Products product, CancellationToken cancellationToken = default)
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
@@ -34,7 +34,7 @@ namespace SalesLedger.Services
             return product;
         }
 
-        public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Products?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             if (id == Guid.Empty)
                 return null;
@@ -44,7 +44,7 @@ namespace SalesLedger.Services
                 .FirstOrDefaultAsync(p => p.ProductId == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Products>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _context.Products
                 .AsNoTracking()
@@ -52,7 +52,7 @@ namespace SalesLedger.Services
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> UpdateAsync(Product product, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateAsync(Products product, CancellationToken cancellationToken = default)
         {
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
@@ -93,7 +93,7 @@ namespace SalesLedger.Services
             return true;
         }
 
-        private void ValidateProduct(Product product)
+        private void ValidateProduct(Products product)
         {
             var errors = new List<string>();
 
