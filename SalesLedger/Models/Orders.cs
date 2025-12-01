@@ -25,8 +25,8 @@ namespace SalesLedger.Models
         [Required]
         public DateTime OrderDate { get; set; }
 
-        public Customers? Customer { get; set; }
-        public Products? Product { get; set; }
+        public Customers? Customer { get; set; } = null!;
+        public Products? Product { get; set; } = null!;
 
     }
 }
