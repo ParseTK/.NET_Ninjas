@@ -5,8 +5,10 @@ namespace SalesLedger.Data
 {
     public class SalesLedgerDbContext : DbContext
     {
-        public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options) : 
-            base(options) { }
+        public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options)
+            : base(options)
+        {
+        }
 
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Products> Products { get; set; }
