@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SalesLedger.Data;
-using SalesLedger.Interfaces;
+using SalesLedger.Application.Interfaces;
+using SalesLedger.Infrastructure.Data;
 using SalesLedger.Models;
 
-namespace SalesLedger.Services
+namespace SalesLedger.Application.Services
 {
     public class ProductService : IProductService
     {

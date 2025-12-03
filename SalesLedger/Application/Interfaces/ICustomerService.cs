@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SalesLedger.Models;
 
-namespace SalesLedger.Interfaces
+namespace SalesLedger.Application.Interfaces
 {
     public interface ICustomerService
     {

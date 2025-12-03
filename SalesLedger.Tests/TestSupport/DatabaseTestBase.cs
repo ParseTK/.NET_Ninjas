@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SalesLedger.Data;
+using SalesLedger.Infrastructure.Data;
 
 namespace SalesLedger.Tests.TestSupport
 {
