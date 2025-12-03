@@ -1,7 +1,6 @@
-﻿
-using SalesLedger.Models;
+﻿using SalesLedger.Models;
 
-namespace SalesLedger.Interfaces
+namespace SalesLedger.Application.Interfaces
 {
     public interface IOrderService
     {

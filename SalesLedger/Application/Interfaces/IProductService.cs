@@ -1,6 +1,6 @@
 ﻿using SalesLedger.Models;
 
-namespace SalesLedger.Interfaces
+namespace SalesLedger.Application.Interfaces
 {
        public interface IProductService
     {

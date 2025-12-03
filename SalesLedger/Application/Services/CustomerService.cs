@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SalesLedger.Services
+namespace SalesLedger.Application.Services
 {
     public class CustomerService
     {
