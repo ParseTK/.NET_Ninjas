@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SalesLedger.Application.Interfaces;
+using SalesLedger.Application.Services;
 using SalesLedger.Data;
-using SalesLedger.Interfaces;
 using SalesLedger.Models;
-using SalesLedger.Services;
 using SalesLedger.Tests.TestSupport;
 using Xunit;
 
