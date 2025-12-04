@@ -8,6 +8,9 @@ using SalesLedger.Data;
 using SalesLedger.Models;
 using SalesLedger.Tests.TestSupport;
 using Xunit;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SalesLedger.Tests
 {
@@ -62,9 +65,7 @@ namespace SalesLedger.Tests
         {
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                
-                await _service.CreateAsync(null);
-
+                await __service.CreateAsync(null);
             });
         }
 
@@ -113,6 +114,86 @@ namespace SalesLedger.Tests
             });
         }
 
+        // ------------------------ NEW TESTS ------------------------
+
+        [Fact]
+        public async Task CreateAsync_ShouldTrimProductName()
+        {
+            var product = new Products
+            {
+                ProductName = "   Trimmed Name   ",
+                UnitPrice = 200m
+            };
+
+            var created = await _service.CreateAsync(product);
+
+            Assert.Equal("Trimmed Name", created.ProductName);
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrowException_WhenNameIsWhitespace()
+        {
+            var product = new Products
+            {
+                ProductName = "    ",
+                UnitPrice = 10m
+            };
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _service.CreateAsync(product);
+            });
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrowException_WhenUnitPriceIsVeryLarge()
+        {
+            var product = new Products
+            {
+                ProductName = "LargePrice",
+                UnitPrice = decimal.MaxValue
+            };
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _service.CreateAsync(product);
+            });
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrowException_WhenUnitPriceIsZero()
+        {
+            var product = new Products
+            {
+                ProductName = "ZeroPrice",
+                UnitPrice = 0m
+            };
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _service.CreateAsync(product);
+            });
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldThrowException_WhenProductNameAlreadyExists()
+        {
+            await _service.CreateAsync(new Products
+            {
+                ProductName = "UniqueName",
+                UnitPrice = 50m
+            });
+
+            await Assert.ThrowsAsync<DbUpdateException>(async () =>
+            {
+                await _service.CreateAsync(new Products
+                {
+                    ProductName = "UniqueName",
+                    UnitPrice = 60m
+                });
+            });
+        }
+
         // --------------------------------------------------------------
         // READ ALL
         // --------------------------------------------------------------
@@ -149,6 +230,26 @@ namespace SalesLedger.Tests
             Assert.Empty(list);
         }
 
+        // ------------------------ NEW TESTS ------------------------
+
+        [Fact]
+        public async Task GetAllAsync_ShouldNotReturnSoftDeletedProducts()
+        {
+            var p = await _service.CreateAsync(new Products
+            {
+                ProductName = "SoftDelete",
+                UnitPrice = 50m
+            });
+
+            p.IsDeleted = true;
+            Context.Products.Update(p);
+            await Context.SaveChangesAsync();
+
+            var list = await _service.GetAllAsync();
+
+            Assert.DoesNotContain(list, x => x.ProductId == p.ProductId);
+        }
+
         // --------------------------------------------------------------
         // READ ONE
         // --------------------------------------------------------------
@@ -160,7 +261,7 @@ namespace SalesLedger.Tests
             var found = await _service.GetByIdAsync(added.ProductId);
 
             Assert.NotNull(found);
-            Assert.Equal("Mouse", found!.ProductName); // ✅ null-forgiving operator
+            Assert.Equal("Mouse", found!.ProductName);
             Assert.Equal(15.00m, found.UnitPrice);
         }
 
@@ -177,6 +278,15 @@ namespace SalesLedger.Tests
         {
             var result = await _service.GetByIdAsync(Guid.Empty);
 
+            Assert.Null(result);
+        }
+
+        // ------------------------ NEW TESTS ------------------------
+
+        [Fact]
+        public async Task GetByIdAsync_ShouldHandleAnyGuid()
+        {
+            var result = await _service.GetByIdAsync(Guid.NewGuid());
             Assert.Null(result);
         }
 
@@ -221,7 +331,6 @@ namespace SalesLedger.Tests
         {
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                
                 await _service.UpdateAsync(null);
             });
         }
@@ -247,6 +356,66 @@ namespace SalesLedger.Tests
             var added = await _service.CreateAsync(new Products { ProductName = "Valid", UnitPrice = 10.00m });
 
             added.ProductName = ""; // Invalid
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await _service.UpdateAsync(added);
+            });
+        }
+
+        // ------------------------ NEW TESTS ------------------------
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrowException_WhenUpdatingToDuplicateName()
+        {
+            var p1 = await _service.CreateAsync(new Products
+            {
+                ProductName = "Product1",
+                UnitPrice = 10m
+            });
+
+            var p2 = await _service.CreateAsync(new Products
+            {
+                ProductName = "Product2",
+                UnitPrice = 20m
+            });
+
+            p2.ProductName = "Product1";
+
+            await Assert.ThrowsAsync<DbUpdateException>(async () =>
+            {
+                await _service.UpdateAsync(p2);
+            });
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldTrimProductName()
+        {
+            var added = await _service.CreateAsync(new Products
+            {
+                ProductName = "TrimTest",
+                UnitPrice = 10m
+            });
+
+            added.ProductName = "   NewTrimmedName   ";
+
+            var result = await _service.UpdateAsync(added);
+            Assert.True(result);
+
+            var updated = await _service.GetByIdAsync(added.ProductId);
+            Assert.Equal("NewTrimmedName", updated.ProductName);
+        }
+
+        [Fact]
+        public async Task UpdateAsync_ShouldThrowException_WhenSettingPriceToVeryLargeValue()
+        {
+            var added = await _service.CreateAsync(new Products
+            {
+                ProductName = "LargeUpdate",
+                UnitPrice = 20m
+            });
+
+            added.UnitPrice = decimal.MaxValue;
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
@@ -284,6 +453,32 @@ namespace SalesLedger.Tests
             Assert.False(result);
         }
 
+        // ------------------------ NEW TESTS ------------------------
+
+        [Fact]
+        public async Task DeleteAsync_ShouldReturnFalse_WhenSoftDeleted()
+        {
+            var added = await _service.CreateAsync(new Products { ProductName = "SoftDel", UnitPrice = 20m });
+
+            added.IsDeleted = true;
+            Context.Products.Update(added);
+            await Context.SaveChangesAsync();
+
+            var result = await _service.DeleteAsync(added.ProductId);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ShouldReturnFalse_WhenIdFormatIsValidButNonexistent()
+        {
+            var fakeId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+            var result = await _service.DeleteAsync(fakeId);
+
+            Assert.False(result);
+        }
+
         // --------------------------------------------------------------
         // DELETE WITH FK VIOLATION
         // --------------------------------------------------------------
@@ -304,6 +499,7 @@ namespace SalesLedger.Tests
                 UnitPrice = 1800.00m,
                 OrderDate = DateTime.UtcNow
             };
+
             Context.Orders.Add(order);
             await Context.SaveChangesAsync();
 
