@@ -2,21 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace SalesLedger.Models
+namespace SalesLedger.Domain
 {
     public class Products
     {
-        [Key]
         public Guid ProductId { get; set; }
+        public required string Name { get; set; }
+        public decimal Price { get; set; }
 
-        [Required]
-        [MaxLength(200)]
-        public required string ProductName { get; set; }
-
-        [Required]
-        public required decimal UnitPrice { get; set; }
-
-        public ICollection<Orders> Orders { get; set; } = [];
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
 

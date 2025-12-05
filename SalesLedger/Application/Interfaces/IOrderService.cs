@@ -1,15 +1,17 @@
-﻿using SalesLedger.Models;
+﻿using SalesLedger.Domain;
 
 namespace SalesLedger.Application.Interfaces
 {
     public interface IOrderService
     {
-        Task<Orders> CreateAsync(Orders order, CancellationToken cancellationToken = default);
-        Task<Orders?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Orders>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<IEnumerable<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Orders>> GetByProductIdAsync(Guid productId, CancellationToken cancellationToken = default);
-        Task<bool> UpdateAsync(Orders order, CancellationToken cancellationToken = default);
-        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Orders?> GetByIdAsync(Guid orderId, CancellationToken ct = default);
+        Task<IReadOnlyCollection<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken ct = default);
+        Task<IReadOnlyCollection<Orders>> GetAllAsync(CancellationToken ct = default);
+        Task<Orders> CreateOrderAsync(Guid customerId, IReadOnlyCollection<OrderItemDto> items, CancellationToken ct = default);
+        Task AddItemToOrderAsync(Guid orderId, Guid productId, int quantity, decimal? unitPriceOverride = null, CancellationToken ct = default);
+        Task RemoveItemFromOrderAsync(Guid orderId, Guid productId, CancellationToken ct = default);
+        Task DeleteOrderAsync(Guid orderId, CancellationToken ct = default);
     }
+
+    public record OrderItemDto(Guid ProductId, int Quantity, decimal? UnitPriceOverride = null);
 }
