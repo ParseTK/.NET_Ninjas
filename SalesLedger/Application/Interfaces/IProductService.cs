@@ -1,13 +1,13 @@
-﻿using SalesLedger.Models;
+﻿using SalesLedger.Domain;
 
 namespace SalesLedger.Application.Interfaces
 {
-       public interface IProductService
+    public interface IProductService
     {
-        Task<Products> CreateAsync(Products product, CancellationToken cancellationToken = default);
-        Task<Products?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<Products>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<bool> UpdateAsync(Products product, CancellationToken cancellationToken = default);
-        Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Products?> GetByIdAsync(Guid productId, CancellationToken ct = default);
+        Task<IReadOnlyCollection<Products>> GetAllAsync(CancellationToken ct = default);
+        Task<Products> CreateAsync(Products product, CancellationToken ct = default);
+        Task UpdateAsync(Products product, CancellationToken ct = default);
+        Task DeleteAsync(Guid productId, CancellationToken ct = default);
     }
 }

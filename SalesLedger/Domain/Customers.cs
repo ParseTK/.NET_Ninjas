@@ -1,23 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using SalesLedger.Domain;
 
 
 
-namespace SalesLedger.Models
+namespace SalesLedger.Domain
 {
     public class Customers
     {
-        [Key]
         public Guid CustomerId { get; set; }
-
-        [Required]
         public required string FirstName { get; set; }
-
-        [Required]
         public required string LastName { get; set; }
-
-        [EmailAddress]
         public required string Email { get; set; }
 
-        public ICollection<Orders> Orders { get; set; } = [];
+        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
     }
 }

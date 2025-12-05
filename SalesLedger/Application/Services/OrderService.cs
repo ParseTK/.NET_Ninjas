@@ -1,154 +1,108 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SalesLedger.Application.Interfaces;
-using SalesLedger.Infrastructure.Data;
-using SalesLedger.Models;
+﻿using SalesLedger.Application.Interfaces;
+using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Repositories;
 
-namespace SalesLedger.Application.Services
+namespace SalesLedger.Application.Services;
+
+public class OrderService : IOrderService
 {
-    public class OrderService : IOrderService
+    private readonly IOrderRepository _orderRepository;
+    private readonly ICustomerRepository _customerRepository;
+    private readonly IProductRepository _productRepository;
+
+    public OrderService(
+        IOrderRepository orderRepository,
+        ICustomerRepository customerRepository,
+        IProductRepository productRepository)
     {
-        private readonly SalesLedgerDbContext _context;
-        private readonly ILogger<OrderService> _logger;
+        _orderRepository = orderRepository;
+        _customerRepository = customerRepository;
+        _productRepository = productRepository;
+    }
 
-        public OrderService(SalesLedgerDbContext context, ILogger<OrderService> logger)
+    public async Task<Orders?> GetByIdAsync(Guid orderId, CancellationToken ct = default)
+        => await _orderRepository.GetByIdAsync(orderId, ct);
+
+    public async Task<IReadOnlyCollection<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken ct = default)
+        => await _orderRepository.GetByCustomerIdAsync(customerId, ct);
+
+    public async Task<IReadOnlyCollection<Orders>> GetAllAsync(CancellationToken ct = default)
+        => await _orderRepository.GetAllAsync(ct);
+
+    public async Task<Orders> CreateOrderAsync(Guid customerId, IReadOnlyCollection<OrderItemDto> items, CancellationToken ct = default)
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId, ct)
+            ?? throw new KeyNotFoundException($"Customer {customerId} not found.");
+
+        var order = new Orders
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+            OrderId = Guid.NewGuid(),
+            CustomerId = customerId,
+            Customer = customer,
+            OrderDate = DateTime.UtcNow,
+            Items = []
+        };
 
-        public async Task<Orders> CreateAsync(Orders order, CancellationToken cancellationToken = default)
+        foreach (var dto in items)
         {
-            if (order == null)
-                throw new ArgumentNullException(nameof(order));
+            var product = await _productRepository.GetByIdAsync(dto.ProductId, ct)
+                ?? throw new KeyNotFoundException($"Product {dto.ProductId} not found.");
 
-            if (order.OrderId == Guid.Empty)
-                order.OrderId = Guid.NewGuid();
+            var unitPrice = dto.UnitPriceOverride ?? product.Price;
 
-            ValidateOrder(order);
-
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Created order with ID: {OrderId}", order.OrderId);
-            return order;
-        }
-
-        public async Task<Orders?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty)
-                return null;
-
-            return await _context.Orders
-                .AsNoTracking()
-                .Include(o => o.Customer)
-                .Include(o => o.Product)
-                .FirstOrDefaultAsync(o => o.OrderId == id, cancellationToken);
-        }
-
-        public async Task<IEnumerable<Orders>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .AsNoTracking()
-                .Include(o => o.Customer)
-                .Include(o => o.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IEnumerable<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
-        {
-            if (customerId == Guid.Empty)
-                return Enumerable.Empty<Orders>();
-
-            return await _context.Orders
-                .AsNoTracking()
-                .Include(o => o.Customer)
-                .Include(o => o.Product)
-                .Where(o => o.CustomerId == customerId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IEnumerable<Orders>> GetByProductIdAsync(Guid productId, CancellationToken cancellationToken = default)
-        {
-            if (productId == Guid.Empty)
-                return Enumerable.Empty<Orders>();
-
-            return await _context.Orders
-                .AsNoTracking()
-                .Include(o => o.Customer)
-                .Include(o => o.Product)
-                .Where(o => o.ProductId == productId)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<bool> UpdateAsync(Orders order, CancellationToken cancellationToken = default)
-        {
-            if (order == null)
-                throw new ArgumentNullException(nameof(order));
-
-            if (order.OrderId == Guid.Empty)
-                return false;
-
-            ValidateOrder(order);
-
-            var existing = await _context.Orders
-                .FindAsync(new object[] { order.OrderId }, cancellationToken);
-
-            if (existing == null)
-                return false;
-
-            _context.Entry(existing).CurrentValues.SetValues(order);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Updated order with ID: {OrderId}", order.OrderId);
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty)
-                return false;
-
-            var order = await _context.Orders
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (order == null)
-                return false;
-
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Deleted order with ID: {OrderId}", id);
-            return true;
-        }
-
-        private void ValidateOrder(Orders order)
-        {
-            var errors = new List<string>();
-
-            if (order.CustomerId == Guid.Empty)
-                errors.Add("Customer ID is required");
-
-            if (order.ProductId == Guid.Empty)
-                errors.Add("Product ID is required");
-
-            if (order.Quantity <= 0)
-                errors.Add("Quantity must be greater than zero");
-
-            if (order.UnitPrice < 0)
-                errors.Add("Unit price cannot be negative");
-
-            if (order.OrderDate == default)
-                errors.Add("Order date is required");
-
-            if (errors.Any())
+            order.Items.Add(new OrderItem
             {
-                var errorMessage = string.Join("; ", errors);
-                throw new InvalidOperationException($"Order validation failed: {errorMessage}");
-            }
+                OrderId = order.OrderId,
+                ProductId = product.ProductId,
+                Product = product,
+                Quantity = dto.Quantity,
+                UnitPrice = unitPrice
+            });
         }
+
+        await _orderRepository.AddAsync(order, ct);
+        await _orderRepository.UnitOfWork.SaveChangesAsync(ct);
+
+        return order;
+    }
+
+    public async Task AddItemToOrderAsync(Guid orderId, Guid productId, int quantity, decimal? unitPriceOverride = null, CancellationToken ct = default)
+    {
+        var order = await _orderRepository.GetByIdWithItemsAsync(orderId, ct)
+            ?? throw new KeyNotFoundException($"Order {orderId} not found.");
+
+        var product = await _productRepository.GetByIdAsync(productId, ct)
+            ?? throw new KeyNotFoundException($"Product {productId} not found.");
+
+        var unitPrice = unitPriceOverride ?? product.Price;
+        var existing = order.Items.FirstOrDefault(i => i.ProductId == productId);
+
+        if (existing != null)
+            existing.Quantity += quantity;
+        else
+            order.Items.Add(new OrderItem { OrderId = orderId, ProductId = productId, Product = product, Quantity = quantity, UnitPrice = unitPrice });
+
+        await _orderRepository.UnitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task RemoveItemFromOrderAsync(Guid orderId, Guid productId, CancellationToken ct = default)
+    {
+        var order = await _orderRepository.GetByIdWithItemsAsync(orderId, ct)
+            ?? throw new KeyNotFoundException($"Order {orderId} not found.");
+
+        var item = order.Items.FirstOrDefault(i => i.ProductId == productId)
+            ?? throw new KeyNotFoundException($"Product {productId} not in order.");
+
+        order.Items.Remove(item);
+        await _orderRepository.UnitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteOrderAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId, ct)
+            ?? throw new KeyNotFoundException($"Order {orderId} not found.");
+
+        _orderRepository.Remove(order);
+        await _orderRepository.UnitOfWork.SaveChangesAsync(ct);
     }
 }

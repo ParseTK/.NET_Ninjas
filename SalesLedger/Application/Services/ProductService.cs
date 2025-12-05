@@ -1,116 +1,48 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SalesLedger.Application.Interfaces;
-using SalesLedger.Infrastructure.Data;
-using SalesLedger.Models;
+﻿using SalesLedger.Application.Interfaces;
+using SalesLedger.Domain;
 
-namespace SalesLedger.Application.Services
+namespace SalesLedger.Application.Services;
+
+public class ProductService : IProductService
 {
-    public class ProductService : IProductService
+    private readonly IProductRepository _repository;
+
+    public ProductService(IProductRepository repository)
     {
-        private readonly SalesLedgerDbContext _context;
-        private readonly ILogger<ProductService> _logger;
+        _repository = repository;
+    }
 
-        public ProductService(SalesLedgerDbContext context, ILogger<ProductService> logger)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+    public async Task<Products?> GetByIdAsync(Guid productId, CancellationToken ct = default)
+        => await _repository.GetByIdAsync(productId, ct);
 
-        public async Task<Products> CreateAsync(Products product, CancellationToken cancellationToken = default)
-        {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
+    public async Task<IReadOnlyCollection<Products>> GetAllAsync(CancellationToken ct = default)
+        => await _repository.GetAllAsync(ct);
 
-            if (product.ProductId == Guid.Empty)
-                product.ProductId = Guid.NewGuid();
+    public async Task<Products> CreateAsync(Products product, CancellationToken ct = default)
+    {
+        await _repository.AddAsync(product, ct);
+        await _repository.UnitOfWork.SaveChangesAsync(ct);
+        return product;
+    }
 
-            ValidateProduct(product);
+    public async Task UpdateAsync(Products product, CancellationToken ct = default)
+    {
+        var existing = await _repository.GetByIdAsync(product.ProductId, ct)
+            ?? throw new KeyNotFoundException($"Product {product.ProductId} not found.");
 
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync(cancellationToken);
+        existing.Name = product.Name;
+        existing.Price = product.Price;
+        existing.Description = product.Description;
 
-            _logger.LogInformation("Created product with ID: {ProductId}", product.ProductId);
-            return product;
-        }
+        await _repository.UnitOfWork.SaveChangesAsync(ct);
+    }
 
-        public async Task<Products?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty)
-                return null;
+    public async Task DeleteAsync(Guid productId, CancellationToken ct = default)
+    {
+        var product = await _repository.GetByIdAsync(productId, ct)
+            ?? throw new KeyNotFoundException($"Product {productId} not found.");
 
-            return await _context.Products
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ProductId == id, cancellationToken);
-        }
-
-        public async Task<IEnumerable<Products>> GetAllAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.Products
-                .AsNoTracking()
-                .OrderBy(p => p.ProductName)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<bool> UpdateAsync(Products product, CancellationToken cancellationToken = default)
-        {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
-
-            if (product.ProductId == Guid.Empty)
-                return false;
-
-            ValidateProduct(product);
-
-            var existing = await _context.Products
-                .FindAsync(new object[] { product.ProductId }, cancellationToken);
-
-            if (existing == null)
-                return false;
-
-            _context.Entry(existing).CurrentValues.SetValues(product);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Updated product with ID: {ProductId}", product.ProductId);
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            if (id == Guid.Empty)
-                return false;
-
-            var product = await _context.Products
-                .FindAsync(new object[] { id }, cancellationToken);
-
-            if (product == null)
-                return false;
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Deleted product with ID: {ProductId}", id);
-            return true;
-        }
-
-        private void ValidateProduct(Products product)
-        {
-            var errors = new List<string>();
-
-            if (string.IsNullOrWhiteSpace(product.ProductName))
-                errors.Add("Product name is required");
-
-            if (product.ProductName?.Length > 200)
-                errors.Add("Product name cannot exceed 200 characters");
-
-            if (product.UnitPrice < 0)
-                errors.Add("Product price cannot be negative");
-
-            if (errors.Any())
-            {
-                var errorMessage = string.Join("; ", errors);
-                throw new InvalidOperationException($"Product validation failed: {errorMessage}");
-            }
-        }
+        _repository.Remove(product);
+        await _repository.UnitOfWork.SaveChangesAsync(ct);
     }
 }
