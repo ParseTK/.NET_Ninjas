@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.SqlServer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using SalesLedger.Application.Interfaces;
 using SalesLedger.Application.Services;
-using SalesLedger.Data;
+using SalesLedger.Infrastructure.Data;
 using SalesLedger.Infrastructure.Repositories;
 
 namespace SalesLedger.Extensions
@@ -23,7 +22,6 @@ namespace SalesLedger.Extensions
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 
             // Application Services
             services.AddScoped<ICustomerService, CustomerService>();

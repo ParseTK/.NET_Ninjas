@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SalesLedger.Data;
 using SalesLedger.Domain;
 using SalesLedger.Infrastructure.Data;
 
