@@ -138,7 +138,8 @@ git push
 ---
 
 ## 📤 Creating a Pull Request
-
+<details> <summary> Click to Expand </summary>
+   
 ### Step 1️⃣ Go to GitHub
 🌐 Navigate to your repository  
 👀 Look for: **"feature/your-feature had recent pushes"**  
@@ -181,10 +182,13 @@ git push
 ✅ Click → **"Confirm merge"**  
 🎉 **Success!** Your code is now in the developer branch
 
+</details>
+
 ---
 
 ## ✅ After Your PR is Merged
-
+<details> <summary> Click to Expand </summary>
+   
 ### Step 1️⃣ Switch Back to Main
 ```bash
 git checkout main
@@ -218,11 +222,13 @@ git branch -a
 git checkout -b feature/next-feature
 ```
 > 🔄 Ready to start the cycle again!
+</details>
 
 ---
 
 ## 🔄 Switching Between Branches
-
+<details> <summary> Click to Expand </summary>
+   
 ### 🔀 Switch to an Existing Branch
 ```bash
 git checkout main                          # Switch to main
@@ -244,11 +250,12 @@ git commit -m "Work in progress"
 git checkout other-branch
 ```
 > 💾 Always commit or stash before switching!
+</details>
 
 ---
 
 ## 🎯 Common Scenarios
-
+<details> <summary> Click to Expand </summary>
 ### 🔄 Scenario 1: Update Your Branch with Latest Code
 **Problem:** Your feature branch is behind main/developer
 
@@ -315,11 +322,13 @@ git reset --hard origin/main            # Reset main to before your commits
 git checkout feature/should-be-here
 git push -u origin feature/should-be-here
 ```
+</details>
 
 ---
 
 ## 🔧 Troubleshooting
-
+<details> <summary> Click to Expand </summary>
+   
 ### ⚠️ Problem: Merge Conflicts
 **When:** Git says "CONFLICT" when merging or pulling
 
@@ -440,11 +449,13 @@ echo ".env" >> .gitignore
 git add .gitignore
 git commit -m "Add sensitive files to gitignore"
 ```
+</details>
 
 ---
 
 ## 📚 Best Practices Summary
-
+<details> <summary> Click to Expand </summary>
+   
 ### ✅ DO:
 - ✨ Always work on feature branches, never directly on main
 - 📥 Pull before you start work each day
@@ -461,10 +472,13 @@ git commit -m "Add sensitive files to gitignore"
 - 🎭 Work on multiple features in one branch
 - 🙈 Forget to pull before starting work
 
+</details>
+
 ---
 
 ## ⚡ Quick Command Reference
-
+<details> <summary> Click to Expand </summary>
+   
 ### 🌿 Branch Management
 ```bash
 git branch                          # 📋 List branches
@@ -511,9 +525,10 @@ git pull                            # 📥 Download and merge remote changes
 git push -u origin branch-name      # 📤 Push new branch first time
 git fetch                           # 📥 Download remote changes (don't merge)
 ```
+</details>
 
+---
 
-
-**Last Updated:** November 2025  
+**Last Updated:** December 6, 2025  
 **Version:** 1.0  
-**Maintained by:** Development Team
+**Maintained by:** Nick, Gaberiel, Alex, Tyler
