@@ -7,9 +7,7 @@ using SalesLedger.Infrastructure.Data;
 
 namespace SalesLedger.Tests.TestSupport
 {
-    /// <summary>
     /// Base class for all database tests. Provides common setup and teardown logic.
-    /// </summary>
     public abstract class DatabaseTestBase : IDisposable
     {
         protected readonly SalesLedgerDbContext Context;
@@ -35,17 +33,13 @@ namespace SalesLedger.Tests.TestSupport
             Context.Database.EnsureCreated();
         }
 
-        /// <summary>
         /// Creates a mock logger for a service
-        /// </summary>
         protected Mock<ILogger<T>> CreateMockLogger<T>()
         {
             return new Mock<ILogger<T>>();
         }
 
-        /// <summary>
         /// Cleans up test database and disposes resources
-        /// </summary>
         public void Dispose()
         {
             Dispose(true);

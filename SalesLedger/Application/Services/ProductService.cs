@@ -1,5 +1,6 @@
-﻿using SalesLedger.Application.Interfaces;
+using SalesLedger.Application.Interfaces;
 using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Repositories;
 
 namespace SalesLedger.Application.Services;
 
@@ -32,7 +33,6 @@ public class ProductService : IProductService
 
         existing.Name = product.Name;
         existing.Price = product.Price;
-        existing.Description = product.Description;
 
         await _repository.UnitOfWork.SaveChangesAsync(ct);
     }
