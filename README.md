@@ -18,6 +18,7 @@
 
 ## ⚡ Daily Workflow Quick Reference
 <details> <summary> Click to Expand </summary>
+   
 ### 🟢 Start Your Day
 ```bash
 git checkout main                           # Switch to main branch
