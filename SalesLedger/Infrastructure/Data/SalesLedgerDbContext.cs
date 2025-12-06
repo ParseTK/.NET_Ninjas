@@ -1,16 +1,25 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Repositories;
+using SalesLedger.Infrastructure.Data;
 
-namespace SalesLedger.Data
+namespace SalesLedger.Infrastructure.Data;
+
+public class SalesLedgerDbContext : DbContext, IUnitOfWork
 {
-    public class SalesLedgerDbContext : DbContext
-    {
-        public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options) : 
-            base(options) { }
+    public SalesLedgerDbContext(DbContextOptions<SalesLedgerDbContext> options)
+        : base(options) { }
 
-        public DbSet<Customers> Customers { get; set; }
-        public DbSet<Products> Products { get; set; }
-        public DbSet<Orders> Orders { get; set; }
-        public DbSet<OrderItem> OrderItem { get; set; }
+    public DbSet<Customers> Customers => Set<Customers>();
+    public DbSet<Products> Products => Set<Products>();
+    public DbSet<Orders> Orders => Set<Orders>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(SalesLedgerDbContext).Assembly);
     }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
+        => await base.SaveChangesAsync(ct);
 }
