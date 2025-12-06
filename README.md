@@ -46,7 +46,6 @@ git branch -d feature/my-new-feature                # Delete locally
 git push origin --delete feature/my-new-feature     # Delete from repo
 ```
 </details>
----
 
 ## 🎬 Starting a New Feature
 
