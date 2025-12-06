@@ -17,7 +17,7 @@
 ---
 
 ## ⚡ Daily Workflow Quick Reference
-<details>
+<details> <summary> Click to Expand </summary>
 ### 🟢 Start Your Day
 ```bash
 git checkout main                           # Switch to main branch
@@ -45,9 +45,9 @@ git push origin developer                   # Update the branch
 git branch -d feature/my-new-feature                # Delete locally
 git push origin --delete feature/my-new-feature     # Delete from repo
 ```
-</details>
----
 
+---
+</details>
 ## 🎬 Starting a New Feature
 
 ### Step 1️⃣ Check Your Current Branch
