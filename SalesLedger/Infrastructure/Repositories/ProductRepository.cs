@@ -1,4 +1,4 @@
-﻿using SalesLedger.Data;
+﻿using SalesLedger.Infrastructure.Data;
 using SalesLedger.Domain;
 
 namespace SalesLedger.Infrastructure.Repositories;

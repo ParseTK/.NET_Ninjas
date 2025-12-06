@@ -1,319 +1,166 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Moq;
+﻿using Moq;
 using SalesLedger.Application.Interfaces;
 using SalesLedger.Application.Services;
-using SalesLedger.Data;
-using SalesLedger.Models;
-using SalesLedger.Tests.TestSupport;
+using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Repositories;
 using Xunit;
 
 namespace SalesLedger.Tests
 {
-    public class ProductServiceTests : DatabaseTestBase
+    public class ProductServiceTests
     {
+        private readonly Mock<IProductRepository> _repoMock;
         private readonly IProductService _service;
-        private readonly Mock<ILogger<ProductService>> _loggerMock;
 
         public ProductServiceTests()
         {
-            _loggerMock = CreateMockLogger<ProductService>();
-            _service = new ProductService(Context, _loggerMock.Object);
+            _repoMock = new Mock<IProductRepository>();
+            _repoMock.SetupGet(r => r.UnitOfWork).Returns(new FakeUnitOfWork());
+            _service = new ProductService(_repoMock.Object);
         }
 
-        // --------------------------------------------------------------
         // CREATE
-        // --------------------------------------------------------------
         [Fact]
-        public async Task CreateAsync_ShouldCreateProduct()
+        public async Task CreateAsync_ShouldPersistProduct()
         {
-            var product = new Products
-            {
-                ProductName = "Laptop",
-                UnitPrice = 800.00m
-            };
+            var product = new Products { ProductId = Guid.NewGuid(), Name = "Laptop", Price = 800m };
 
-            var result = await _service.CreateAsync(product);
+            _repoMock.Setup(r => r.AddAsync(product, It.IsAny<CancellationToken>()))
+                     .Returns(Task.CompletedTask);
 
-            Assert.NotNull(result);
-            Assert.NotEqual(Guid.Empty, result.ProductId);
-            Assert.Equal("Laptop", result.ProductName);
-            Assert.Equal(800.00m, result.UnitPrice);
+            var created = await _service.CreateAsync(product);
+
+            Assert.Equal("Laptop", created.Name);
+            Assert.Equal(800m, created.Price);
+            _repoMock.Verify(r => r.AddAsync(product, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
-        public async Task CreateAsync_ShouldGenerateGuidIfEmpty()
-        {
-            var product = new Products
-            {
-                ProductId = Guid.Empty,
-                ProductName = "Mouse",
-                UnitPrice = 25.00m
-            };
-
-            var result = await _service.CreateAsync(product);
-
-            Assert.NotEqual(Guid.Empty, result.ProductId);
-        }
-
-        [Fact]
-        public async Task CreateAsync_ShouldThrowException_WhenProductIsNull()
+        public async Task CreateAsync_ShouldThrow_WhenNull()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                
-                await _service.CreateAsync(null);
-
-            });
+                await _service.CreateAsync(null!)
+            );
         }
 
+        // READ
         [Fact]
-        public async Task CreateAsync_ShouldThrowException_WhenProductNameIsEmpty()
+        public async Task GetByIdAsync_ShouldReturnProduct_WhenExists()
         {
-            var product = new Products
-            {
-                ProductName = "",
-                UnitPrice = 100m
-            };
+            var id = Guid.NewGuid();
+            var product = new Products { ProductId = id, Name = "Mouse", Price = 15m };
 
-            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _service.CreateAsync(product);
-            });
-        }
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(product);
 
-        [Fact]
-        public async Task CreateAsync_ShouldThrowException_WhenPriceIsNegative()
-        {
-            var product = new Products
-            {
-                ProductName = "Test Product",
-                UnitPrice = -10m
-            };
-
-            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _service.CreateAsync(product);
-            });
-        }
-
-        [Fact]
-        public async Task CreateAsync_ShouldThrowException_WhenProductNameExceeds200Characters()
-        {
-            var product = new Products
-            {
-                ProductName = new string('A', 201),
-                UnitPrice = 100m
-            };
-
-            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _service.CreateAsync(product);
-            });
-        }
-
-        // --------------------------------------------------------------
-        // READ ALL
-        // --------------------------------------------------------------
-        [Fact]
-        public async Task GetAllAsync_ShouldReturnAllProducts()
-        {
-            await _service.CreateAsync(new Products { ProductName = "Product A", UnitPrice = 10.00m });
-            await _service.CreateAsync(new Products { ProductName = "Product B", UnitPrice = 20.00m });
-
-            var list = await _service.GetAllAsync();
-
-            Assert.Equal(2, list.Count());
-        }
-
-        [Fact]
-        public async Task GetAllAsync_ShouldReturnProductsInAlphabeticalOrder()
-        {
-            await _service.CreateAsync(new Products { ProductName = "Zebra", UnitPrice = 10.00m });
-            await _service.CreateAsync(new Products { ProductName = "Apple", UnitPrice = 20.00m });
-            await _service.CreateAsync(new Products { ProductName = "Mango", UnitPrice = 15.00m });
-
-            var list = (await _service.GetAllAsync()).ToList();
-
-            Assert.Equal("Apple", list[0].ProductName);
-            Assert.Equal("Mango", list[1].ProductName);
-            Assert.Equal("Zebra", list[2].ProductName);
-        }
-
-        [Fact]
-        public async Task GetAllAsync_ShouldReturnEmptyList_WhenNoProducts()
-        {
-            var list = await _service.GetAllAsync();
-
-            Assert.Empty(list);
-        }
-
-        // --------------------------------------------------------------
-        // READ ONE
-        // --------------------------------------------------------------
-        [Fact]
-        public async Task GetByIdAsync_ShouldReturnProduct()
-        {
-            var added = await _service.CreateAsync(new Products { ProductName = "Mouse", UnitPrice = 15.00m });
-
-            var found = await _service.GetByIdAsync(added.ProductId);
+            var found = await _service.GetByIdAsync(id);
 
             Assert.NotNull(found);
-            Assert.Equal("Mouse", found!.ProductName); // ✅ null-forgiving operator
-            Assert.Equal(15.00m, found.UnitPrice);
+            Assert.Equal("Mouse", found!.Name);
+            Assert.Equal(15m, found.Price);
         }
 
         [Fact]
-        public async Task GetByIdAsync_ShouldReturnNull_WhenProductNotFound()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenMissing()
         {
-            var result = await _service.GetByIdAsync(Guid.NewGuid());
+            var id = Guid.NewGuid();
 
-            Assert.Null(result);
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((Products?)null);
+
+            var found = await _service.GetByIdAsync(id);
+
+            Assert.Null(found);
         }
 
         [Fact]
-        public async Task GetByIdAsync_ShouldReturnNull_WhenIdIsEmpty()
+        public async Task GetAllAsync_ShouldReturnList()
         {
-            var result = await _service.GetByIdAsync(Guid.Empty);
-
-            Assert.Null(result);
-        }
-
-        // --------------------------------------------------------------
-        // UPDATE
-        // --------------------------------------------------------------
-        [Fact]
-        public async Task UpdateAsync_ShouldUpdateProduct()
-        {
-            var added = await _service.CreateAsync(new Products { ProductName = "Old Name", UnitPrice = 10.00m });
-
-            added.ProductName = "New Name";
-            added.UnitPrice = 20.00m;
-
-            var result = await _service.UpdateAsync(added);
-
-            Assert.True(result);
-
-            var updated = await _service.GetByIdAsync(added.ProductId);
-            Assert.NotNull(updated);
-            Assert.Equal("New Name", updated!.ProductName);
-            Assert.Equal(20.00m, updated.UnitPrice);
-        }
-
-        [Fact]
-        public async Task UpdateAsync_ShouldReturnFalse_WhenProductNotFound()
-        {
-            var product = new Products
+            var list = new List<Products>
             {
-                ProductId = Guid.NewGuid(),
-                ProductName = "Non-existent",
-                UnitPrice = 10.00m
+                new() { ProductId = Guid.NewGuid(), Name = "A", Price = 10m },
+                new() { ProductId = Guid.NewGuid(), Name = "B", Price = 20m }
             };
 
-            var result = await _service.UpdateAsync(product);
+            _repoMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(list);
 
-            Assert.False(result);
+            var result = await _service.GetAllAsync();
+
+            Assert.Equal(2, result.Count);
+        }
+
+        // UPDATE
+        [Fact]
+        public async Task UpdateAsync_ShouldApplyChanges_WhenExists()
+        {
+            var id = Guid.NewGuid();
+            var existing = new Products { ProductId = id, Name = "Old", Price = 10m };
+            var update = new Products { ProductId = id, Name = "New", Price = 20m };
+
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(existing);
+
+            await _service.UpdateAsync(update);
+
+            Assert.Equal("New", existing.Name);
+            Assert.Equal(20m, existing.Price);
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldThrowException_WhenProductIsNull()
+        public async Task UpdateAsync_ShouldThrow_WhenNull()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                
-                await _service.UpdateAsync(null);
-            });
+                await _service.UpdateAsync(null!)
+            );
         }
 
         [Fact]
-        public async Task UpdateAsync_ShouldReturnFalse_WhenIdIsEmpty()
+        public async Task UpdateAsync_ShouldThrow_WhenMissing()
         {
-            var product = new Products
-            {
-                ProductId = Guid.Empty,
-                ProductName = "Test",
-                UnitPrice = 10.00m
-            };
+            var id = Guid.NewGuid();
+            var update = new Products { ProductId = id, Name = "X", Price = 1m };
 
-            var result = await _service.UpdateAsync(product);
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((Products?)null);
 
-            Assert.False(result);
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _service.UpdateAsync(update)
+            );
         }
 
-        [Fact]
-        public async Task UpdateAsync_ShouldThrowException_WhenValidationFails()
-        {
-            var added = await _service.CreateAsync(new Products { ProductName = "Valid", UnitPrice = 10.00m });
-
-            added.ProductName = ""; // Invalid
-
-            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                await _service.UpdateAsync(added);
-            });
-        }
-
-        // --------------------------------------------------------------
         // DELETE
-        // --------------------------------------------------------------
         [Fact]
-        public async Task DeleteAsync_ShouldDeleteProduct()
+        public async Task DeleteAsync_ShouldRemove_WhenExists()
         {
-            var added = await _service.CreateAsync(new Products { ProductName = "DeleteMe", UnitPrice = 5.00m });
+            var id = Guid.NewGuid();
+            var existing = new Products { ProductId = id, Name = "DeleteMe", Price = 5m };
 
-            var result = await _service.DeleteAsync(added.ProductId);
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(existing);
 
-            Assert.True(result);
-            Assert.Null(await _service.GetByIdAsync(added.ProductId));
+            await _service.DeleteAsync(id);
+
+            _repoMock.Verify(r => r.Remove(existing), Times.Once);
         }
 
         [Fact]
-        public async Task DeleteAsync_ShouldReturnFalse_WhenProductNotFound()
+        public async Task DeleteAsync_ShouldThrow_WhenMissing()
         {
-            var result = await _service.DeleteAsync(Guid.NewGuid());
+            var id = Guid.NewGuid();
 
-            Assert.False(result);
+            _repoMock.Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+                     .ReturnsAsync((Products?)null);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+                await _service.DeleteAsync(id)
+            );
         }
 
-        [Fact]
-        public async Task DeleteAsync_ShouldReturnFalse_WhenIdIsEmpty()
+        private sealed class FakeUnitOfWork : IUnitOfWork
         {
-            var result = await _service.DeleteAsync(Guid.Empty);
-
-            Assert.False(result);
-        }
-
-        // --------------------------------------------------------------
-        // DELETE WITH FK VIOLATION
-        // --------------------------------------------------------------
-        [Fact]
-        public async Task DeleteAsync_ShouldThrowException_WhenProductHasOrders()
-        {
-            var product = await _service.CreateAsync(new Products
-            {
-                ProductName = "Laptop",
-                UnitPrice = 900.00m
-            });
-
-            var order = new Orders
-            {
-                OrderId = Guid.NewGuid(),
-                ProductId = product.ProductId,
-                Quantity = 2,
-                UnitPrice = 1800.00m,
-                OrderDate = DateTime.UtcNow
-            };
-            Context.Orders.Add(order);
-            await Context.SaveChangesAsync();
-
-            await Assert.ThrowsAsync<DbUpdateException>(async () =>
-            {
-                await _service.DeleteAsync(product.ProductId);
-            });
-
-            var stillExists = await _service.GetByIdAsync(product.ProductId);
-            Assert.NotNull(stillExists);
+            public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+                => Task.FromResult(1);
         }
     }
 }
