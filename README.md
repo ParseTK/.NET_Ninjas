@@ -84,7 +84,8 @@ git branch
 ---
 
 ## 💻 Working on Your Feature
-
+<details> <summary> Click to Expand </summary>
+   
 ### Step 1️⃣ Make Your Changes
 🖊️ Open Visual Studio Code or your editor  
 📝 Edit the files you need to change  
@@ -132,7 +133,8 @@ git push -u origin feature/email-validation
 git push
 ```
 > 🎯 The `-u` flag sets up tracking so future pushes are easier
-
+</details
+   
 ---
 
 ## 📤 Creating a Pull Request
