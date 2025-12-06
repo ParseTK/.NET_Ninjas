@@ -30,7 +30,7 @@ git checkout -b feature/my-new-feature      # Create a new branch for your featu
 ```bash
 git add .                                   # Add your updates
 git commit -m "Clear description"           # Commit with a message
-git push origin feature/my-new-feature      # Push to GitHub repo
+git push -u origin feature/my-new-feature   # Push to GitHub repo
 ```
 
 ### 🎉 End of Feature
