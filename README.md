@@ -49,7 +49,8 @@ git push origin --delete feature/my-new-feature     # Delete from repo
 </details>
 
 ## 🎬 Starting a New Feature
-
+<details> <summary> Click to Expand </summary>
+   
 ### Step 1️⃣ Check Your Current Branch
 ```bash
 git branch
@@ -78,7 +79,8 @@ git checkout -b feature/your-feature-name
 git branch
 ```
 > ✅ You should see `*` next to your new feature branch
-
+</details
+   
 ---
 
 ## 💻 Working on Your Feature
