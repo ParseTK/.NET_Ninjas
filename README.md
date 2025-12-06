@@ -48,6 +48,8 @@ git push origin --delete feature/my-new-feature     # Delete from repo
 ```
 </details>
 
+---
+
 ## 🎬 Starting a New Feature
 <details> <summary> Click to Expand </summary>
    
@@ -79,8 +81,8 @@ git checkout -b feature/your-feature-name
 git branch
 ```
 > ✅ You should see `*` next to your new feature branch
-</details
-   
+</details>
+
 ---
 
 ## 💻 Working on Your Feature
@@ -133,7 +135,8 @@ git push -u origin feature/email-validation
 git push
 ```
 > 🎯 The `-u` flag sets up tracking so future pushes are easier
-</details
+
+</details>
    
 ---
 
