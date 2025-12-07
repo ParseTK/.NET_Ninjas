@@ -1,6 +1,7 @@
 ﻿using SalesLedger.Domain;
 
 namespace SalesLedger.Infrastructure.Repositories;
+
 public interface IOrderRepository : IRepository<Orders>
 {
     Task<Orders?> GetByIdWithItemsAsync(Guid orderId, CancellationToken ct = default);

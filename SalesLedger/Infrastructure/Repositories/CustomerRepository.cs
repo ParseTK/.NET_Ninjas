@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SalesLedger.Infrastructure.Data;
 using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Data;
 
 namespace SalesLedger.Infrastructure.Repositories;
 public class CustomerRepository(SalesLedgerDbContext context)

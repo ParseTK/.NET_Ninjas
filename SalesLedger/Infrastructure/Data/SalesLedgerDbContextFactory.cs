@@ -1,36 +1,22 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
-namespace SalesLedger.Infrastructure.Data;
-
-/// Design-time factory for creating DbContext instances during migrations.
-/// This allows 'dotnet ef' commands to work properly.
-public class SalesLedgerDbContextFactory : IDesignTimeDbContextFactory<SalesLedgerDbContext>
+namespace SalesLedger.Infrastructure.Data
 {
-    public SalesLedgerDbContext CreateDbContext(string[] args)
+    public class SalesLedgerDbContextFactory : IDesignTimeDbContextFactory<SalesLedgerDbContext>
     {
-        // Build configuration to read from user secrets
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddUserSecrets<SalesLedgerDbContextFactory>()
-            .Build();
-
-        // Get connection string
-        var connectionString = configuration.GetConnectionString("SalesLedgerDb");
-
-        if (string.IsNullOrWhiteSpace(connectionString))
+        public SalesLedgerDbContext CreateDbContext(string[] args)
         {
-            throw new InvalidOperationException(
-                "Connection string 'SalesLedgerDb' not found. " +
-                "Please configure it using: " +
-                "dotnet user-secrets set \"ConnectionStrings:SalesLedgerDb\" \"your-connection-string\"");
+            var configuration = new ConfigurationBuilder()
+                .AddUserSecrets(typeof(SalesLedgerDbContextFactory).Assembly) // load secrets from this assembly
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<SalesLedgerDbContext>();
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("SalesLedgerDb"));
+
+            return new SalesLedgerDbContext(optionsBuilder.Options);
         }
-
-        // Create DbContextOptions
-        var optionsBuilder = new DbContextOptionsBuilder<SalesLedgerDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        return new SalesLedgerDbContext(optionsBuilder.Options);
     }
 }

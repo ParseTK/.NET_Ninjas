@@ -1,6 +1,7 @@
 ﻿using SalesLedger.Domain;
 
 namespace SalesLedger.Infrastructure.Repositories;
+
 public interface IRepository<T> where T : class
 {
     Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default);

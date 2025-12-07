@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using SalesLedger.Infrastructure.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using SalesLedger.Domain;
+using SalesLedger.Infrastructure.Data;
 
 namespace SalesLedger.Infrastructure.Repositories;
+
 public class OrderRepository(SalesLedgerDbContext context)
     : Repository<Orders>(context), IOrderRepository
 {
@@ -16,5 +17,7 @@ public class OrderRepository(SalesLedgerDbContext context)
     public async Task<IReadOnlyCollection<Orders>> GetByCustomerIdAsync(Guid customerId, CancellationToken ct = default)
         => await _context.Orders
             .Where(o => o.CustomerId == customerId)
+            .Include(o => o.Items!)
+                .ThenInclude(i => i.Product)
             .ToListAsync(ct);
 }
