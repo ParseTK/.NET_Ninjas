@@ -92,7 +92,7 @@ dotnet ef database update
 
 ---
 
-### 💻 CRUD Operations by Entity
+## 💻 CRUD Operations by Entity
 
 | Entity         | Create | Read   | Update                  | Delete                  | Notes / Current Status                              | Severity |
 |----------------|--------|--------|-------------------------|-------------------------|-----------------------------------------------------|----------|
