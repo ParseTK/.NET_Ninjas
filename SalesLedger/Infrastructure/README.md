@@ -15,7 +15,7 @@
 ```
 Infrastructure/
 ├── Data/                # DbContext and design-time factory
-├── Configurations/      # Entity Framework Fluent API configurations
+    ├── Configurations/  # Entity Framework Fluent API configurations
 ├── Repositories/        # Repository pattern implementations
 ```
 
