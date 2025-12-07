@@ -89,3 +89,19 @@ Connection strings are managed through:
 dotnet ef migrations add YourMigrationName
 dotnet ef database update
 ```
+
+---
+
+## 💻 CRUD Operations by Entity
+
+| Entity         | Create | Read   | Update                  | Delete                  | Notes / Current Status                              | Severity |
+|----------------|--------|--------|-------------------------|-------------------------|-----------------------------------------------------|----------|
+| **Customer**   | Yes    | Yes    | Yes Full (all fields)   | Yes Cascade            | Fully implemented & granular                        | Low      |
+| **Product**    | Yes    | Yes    | Yes Full (Name + Price) | Yes Safe (Restrict if in orders) | Fully implemented                                   | Low      |
+| **Order**      | Yes    | Yes    | No updates allowed   | No Soft-delete only     | Immutable by design – once placed, order cannot be modified | High     |
+| **OrderItem**  | Yes (with Order) | Yes | No Disabled by design   | No Disabled by design   | Created together with Order, never changed afterward | Low      |
+
+#### Key
+- Yes = Fully supported and granular  
+- No = Intentionally not allowed (business rule)  Missing / not yet implemented  
+- Severity = How big a problem it would be if we suddenly needed that operation tomorrow
