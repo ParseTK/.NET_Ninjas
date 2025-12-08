@@ -5,7 +5,7 @@ using SalesLedger.Domain;
 using SalesLedger.Infrastructure.Repositories;
 using Xunit;
 
-namespace SalesLedger.Tests
+namespace SalesLedger.Tests.Unit
 {
     public class ProductServiceTests
     {

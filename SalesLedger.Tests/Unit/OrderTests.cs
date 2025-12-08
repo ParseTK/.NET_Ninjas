@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SalesLedger.Tests
+namespace SalesLedger.Tests.Unit
 {
     public class OrderTests
     {
