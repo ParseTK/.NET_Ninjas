@@ -133,7 +133,7 @@ namespace SalesLedger.UI
                 AnsiConsole.WriteLine();
 
                 // Actions
-                UIHelper.ShowInfo("Actions: [V] View Details | [E] Edit | [D] Delete | [0] Back");
+                UIHelper.ShowInfo("Actions: [[V]] View Details | [[E]] Edit | [[D]] Delete | [[0]] Back");
                 AnsiConsole.WriteLine();
 
                 var action = UIHelper.PromptMenuChoice(
