@@ -30,6 +30,8 @@ public class ProductService : IProductService
 
     public async Task UpdateAsync(Products product, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(product);
+
         var existing = await _repository.GetByIdAsync(product.ProductId, ct)
             ?? throw new KeyNotFoundException($"Product {product.ProductId} not found.");
 
