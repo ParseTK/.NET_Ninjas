@@ -40,7 +40,7 @@ namespace SalesLedger.UI
         /// Displays a warning message
         public static void ShowWarning(string message)
         {
-            AnsiConsole.MarkupLine($"[yellow]⚠ {message}[/]");
+            AnsiConsole.MarkupLine($"[yellow]❢ {message}[/]");
         }
 
         /// Displays an info message

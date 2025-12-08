@@ -152,7 +152,7 @@ namespace SalesLedger.UI
                 AnsiConsole.WriteLine();
 
                 // Actions
-                UIHelper.ShowInfo("Actions: [V] View Details | [D] Delete | [0] Back");
+                UIHelper.ShowInfo("Actions: [[V]] View Details | [[D]] Delete | [[0]] Back");
                 AnsiConsole.WriteLine();
 
                 var action = UIHelper.PromptMenuChoice(
@@ -269,7 +269,7 @@ namespace SalesLedger.UI
             UIHelper.ShowHeader("CREATE NEW ORDER - WIZARD");
 
             AnsiConsole.MarkupLine("[cyan]This wizard will guide you through creating a new order.[/]");
-            AnsiConsole.MarkupLine("[grey]Steps: [1] Select Customer → [2] Add Products → [3] Review → [4] Confirm[/]");
+AnsiConsole.MarkupLine("[grey]Steps: [[1]] Select Customer > [[2]] Add Products > [[3]] Review > [[4]] Confirm[/]");
             AnsiConsole.WriteLine();
 
             if (!UIHelper.Confirm("Start order creation?"))
@@ -296,6 +296,10 @@ namespace SalesLedger.UI
             catch (Exception ex)
             {
                 UIHelper.ShowError($"Error creating order: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                UIHelper.ShowError($"Inner exception: {ex.InnerException.Message}");
+            }
                 UIHelper.PressAnyKey();
             }
         }

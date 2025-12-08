@@ -143,18 +143,23 @@ namespace SalesLedger.UI
         private void ShowGoodbyeMessage()
         {
             UIHelper.ClearScreen();
-            AnsiConsole.Write(
-                new FigletText("SalesLedger")
-                    .Color(Color.Blue));
+            string asciiArt = """
+                   _____       _             _              _                 
+                  ⧸ ____|     | |           | |            | |                
+                 ⎹ (____  __ _| | ___  ___  | |     ___  __| | __ _  ___ _ __ 
+                  \___  ⧹/ _` | |/ _ \/ __| | |    / _ \/ _` |/ _` |/ _ \ '__|
+                  ____) | (_| | |  __/\__ \ | |___⎹  __/ (_| | (_| |  __/ |   
+                 ⎹＿＿＿⧸\__,_|_|\___||___/ |______\___|\__,_|\__, |\___|_|   
+                                                               __/ |          
+                """;
             
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[cyan]Thank you for using our SalesLedger![/]");
-            AnsiConsole.MarkupLine("[grey]Developed by .NET_Ninjas[/]");
-            AnsiConsole.MarkupLine("[grey]              Tyler[/]");
-            AnsiConsole.MarkupLine("[grey]              Gabriel[/]");
-            AnsiConsole.MarkupLine("[grey]              Alex[/]");
-            AnsiConsole.MarkupLine("[grey]              Nick[/]");
-            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[blue]{asciiArt}[/]");
+            AnsiConsole.MarkupLine($"[cyan] Thank you for using our SalesLedger![/]{"".PadRight(9)}[blue]⎹＿＿⧸[/]");
+            AnsiConsole.MarkupLine("[grey] Developed by .NET_Ninjas[/]");
+            AnsiConsole.MarkupLine($"[grey]{"Tyler".PadLeft(20)}[/]");
+            AnsiConsole.MarkupLine($"[grey]{"Gabriel".PadLeft(22)}[/]");
+            AnsiConsole.MarkupLine($"[grey]{"Alex".PadLeft(19)}[/]");
+            AnsiConsole.MarkupLine($"[grey]{"Nick".PadLeft(19)}[/]\n");
         }
     }
 }
