@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SalesLedger.Tests
+namespace SalesLedger.Tests.IntergrationTests
 {
-    public class CustomerTests
+    internal class CustomerServiceTests
     {
     }
 }
