@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SalesLedger.Domain;
-using SalesLedger.Infrastructure.Repositories;
 using SalesLedger.Infrastructure.Data;
+using SalesLedger.Infrastructure.Data.Configurations;
+using SalesLedger.Infrastructure.Repositories;
 
 namespace SalesLedger.Infrastructure.Data;
 
@@ -18,6 +19,8 @@ public class SalesLedgerDbContext : DbContext, IUnitOfWork
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SalesLedgerDbContext).Assembly);
+
+        modelBuilder.Seed();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
